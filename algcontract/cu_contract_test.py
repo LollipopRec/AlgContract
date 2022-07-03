@@ -6,5 +6,3 @@ def parse_test():
     raw_content_path = "./data/items.json"
     forward_load_path = contract.parse(raw_content_path, model_ar_dir)
     print("forward_load_path", forward_load_path)
-
-parse_test()

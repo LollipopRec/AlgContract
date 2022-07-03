@@ -33,6 +33,3 @@ def recall_recall_test():
     user_feature = {'cate': ['宠物零食', '影视', '游戏', '游戏名词', '游戏名', '角色名', '游戏解说', '游戏比赛', '体育', '运动教学', '电视剧', '纪录片', '奖项', '游戏资讯', '运动品牌', '少儿', '体育资讯', '动漫', '体育明星', '运动项目', '电影', '组织', '民间/大众运动', '综艺']}
     recall_list = recall_contract.recall(user_feature, 20)
     print(recall_list)
-
-if __name__ == "__main__":
-    recall_recall_test()

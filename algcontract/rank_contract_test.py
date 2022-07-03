@@ -38,5 +38,3 @@ def rank_rank_test():
     forward_items = load_forward(forward_local_dir)
     print(contract.rank(recall_items, user_features, forward_items, reserve_num = 10))
 
-
-rank_rank_test()
