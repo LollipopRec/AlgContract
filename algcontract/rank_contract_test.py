@@ -18,7 +18,6 @@ def rank_init_test():
     contract = RankAlgorithmContractExample(model_ar_dir)
     return contract
 
-
 def load_forward(forward_local_dir):
     forward_items = {}
     with open(forward_local_dir, "r") as f:
@@ -33,8 +32,7 @@ def load_forward(forward_local_dir):
 def rank_rank_test():
     contract = rank_init_test()
     recall_items = [{'id': 263}, {'id': 720}, {'id': 882}, {'id': 241}, {'id': 383}, {'id': 658}, {'id': 380}, {'id': 381}, {'id': 438}, {'id': 687}, {'id': 479}, {'id': 778}, {'id': 627}, {'id': 465}, {'id': 351}, {'id': 283}, {'id': 721}, {'id': 499}, {'id': 712}, {'id': 591}]
-    user_features = {'cate': ['宠物零食', '影视', '游戏', '游戏名词', '游戏名', '角色名', '游戏解说', '游戏比赛', '体育', '运动教学', '电视剧', '纪录片', '奖项', '游戏资讯', '运动品牌', '少儿', '体育资讯', '动漫', '体育明星', '运动项目', '电影', '组织', '民间/大众运动', '综艺']}
+    user_features = {'cate': {'misc.forsale': 0.18, 'sci.med': 0.08, 'comp.graphics': 0.02, 'talk.politics.guns': 0.18, 'rec.sport.hockey': 0.12, 'soc.religion.christian': 0.08, 'rec.autos': 0.06, 'comp.windows.x': 0.12, 'sci.crypt': 0.08, 'rec.sport.baseball': 0.05, 'comp.sys.mac.hardware': 0.02, 'talk.politics.misc': 0.02, 'comp.os.ms-windows.misc': 0.02}}
     forward_local_dir = "./data/forward.json"
     forward_items = load_forward(forward_local_dir)
     print(contract.rank(recall_items, user_features, forward_items, reserve_num = 10))
-
