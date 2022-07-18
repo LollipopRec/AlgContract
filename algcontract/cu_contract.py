@@ -10,13 +10,6 @@ import random
 import heapq
 from algorithm_contract import ContentUnderstandingAlgorithmContract
 
-def random_list(k):
-    output = []
-    while len(output) < k:
-        num = random.randint(0, 99)
-        if num not in output:
-            output.append(num)
-    return output 
 
 def get_ar_file(ar_ads):
     ar_local_ads = ar_ads
@@ -55,9 +48,12 @@ class DataReader(object):
         return word_map        
     
     def to_ids(self, inputs):
+        stop_list = [" ", ",", "\n", ".", "!", "\"", "\'"]
         output = []
-        inputs = list(jieba.cut(inputs, cut_all=True))
+        inputs = list(jieba.cut(inputs))
         for key in inputs:
+            if key in stop_list:
+                continue
             if key in self.word_map:
                 if self.word_map[key] < self.vocab_len:
                     output.append(self.word_map[key])
@@ -72,26 +68,35 @@ class DataReader(object):
     
     def sparse_label(self, inputs):
         outputs = [0] * self.label_len
-        for idx in range(len(inputs)):
-            outputs[inputs[idx]] = 1
+        outputs[inputs] = 1
         return outputs
 
 
-    def encoding_data(self):
+    def encoding_data(self, cate_vocab_path):
         examples = []
+        cate_list = self.load_cate_vocab(cate_vocab_path)
         for data in self.datas:
-            text = ",".join(data["paragraphs"])
-            title = ",".join(data["title"])
+            text = data["paragraphs"]
             text_ids = self.to_ids(text)
-            title_ids = self.to_ids(title)
             if len(text_ids) == 0 :
                 continue
             example = {}
             example["feature"] = self.padding_feature(text_ids, self.text_len)
-            example["label"] = self.sparse_label(random_list(3))
+            example["label"] = self.sparse_label(cate_list[data["cate"]])
             example["id"] = data["id"]
             examples.append(example)
         return examples
+    
+    def load_cate_vocab(self, cate_vocab_path):
+        cate_dic = {}
+        with open(cate_vocab_path, "r") as f:
+            lines = f.readlines()
+            n = 0
+            for line in lines:
+                line = line.strip()
+                cate_dic[line] = n
+                n += 1
+        return cate_dic
 
 class Evaluate(K.callbacks.Callback):
     def __init__(self, model, save_dir):
@@ -206,10 +211,10 @@ class CuModel():
         cates = []
         for predict in predicts:
             if len(predict) != len(cate_list):
-                raise TypeError
+                raise TypeError("predict len %d cate_list len %d" % (len(predict), len(cate_list)))
             output = []
             for idx, score in enumerate(predict):
-                if score > 0.01:
+                if score > 0.06:
                     output.append(cate_list[idx])
             if len(output) < 3:
                 top_k = heapq.nlargest(3, range(len(predict)), predict.__getitem__)
@@ -259,8 +264,8 @@ class ContentUnderstandingAlgorithmContractExample(ContentUnderstandingAlgorithm
         # cate_vocab_path : 模型输出的类目对应的词表
         # save_cu_att_data_path : 存放生成的正排数据的本地地址
         self.text_len = 20
-        self.label_len = 100
-        self.vocab_len = 260000
+        self.label_len = 20
+        self.vocab_len = 380000
         self.vocab_path = "./data/vocab"
         self.predict_batch_size = 10
         self.cate_vocab_path = "./data/cate_vocab"
@@ -274,7 +279,7 @@ class ContentUnderstandingAlgorithmContractExample(ContentUnderstandingAlgorithm
 
         # 处理item的原始数据
         data_reader = DataReader(raw_content_path, self.vocab_path, self.text_len, self.label_len, self.vocab_len)
-        examples = data_reader.encoding_data()
+        examples = data_reader.encoding_data(self.cate_vocab_path)
 
         # 预测每个item的类目并处理成输出所需要的格式
         cu_att_data = model.predict(cu_model, examples, self.predict_batch_size, self.cate_vocab_path)
@@ -298,12 +303,13 @@ def main():
 # 训练模型
 def train():
     text_len = 20
-    label_len = 100
-    vocab_len = 260000
+    label_len = 20
+    vocab_len = 380000
     file_path = "./data/items.json"
     vocab_path = "./data/vocab"
+    cate_vocab_path =  "./data/cate_vocab"
     data_reader = DataReader(file_path, vocab_path, text_len, label_len, vocab_len)
-    examples = data_reader.encoding_data()
+    examples = data_reader.encoding_data(cate_vocab_path)
     model = CuModel(text_len, label_len, vocab_len)
     save_path = "./models/cu_model/test"
     batch_size = 24
