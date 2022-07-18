@@ -84,12 +84,18 @@ class DataReader(object):
             del item["cate"]
             items_ids.append(item)
         return items_ids
+    
+    def trans_user_encode(self, inputs):
+        outputs = []
+        for key in inputs:
+            outputs.append(key)
+        return outputs
 
     def encoding_data(self, examples):
         # 将模型训练用的样本，转换成 main model 可接收的输入格式
         examples_ids = []
         for example in examples:
-            user_ids = self.cate_to_ids(example["user_feature"]["cate"])
+            user_ids = self.cate_to_ids(self.trans_user_encode(example["user_feature"]["cate"]))
             user_ids = self.padding_truncating_encoding(user_ids, self.user_id_len)
             doc_samples = self.process_doc_sample(example["docs"])
             for sample in doc_samples:
@@ -127,7 +133,7 @@ class DataReader(object):
     def load_user_data(self, user_feature):
         # 将用户特征转换成 user_embeding_model 可以接受的输入格式
         user_encode = {}
-        user_ids = self.cate_to_ids(user_feature)
+        user_ids = self.cate_to_ids(self.trans_user_encode(user_feature))
         user_ids = self.padding_truncating_encoding(user_ids, self.user_id_len)
         user_encode["user_ids"] = user_ids
         return user_encode
@@ -401,7 +407,7 @@ class RecallAlgorithmContractExample(RecallAlgorithmContract):
         # cate_vocab_len : 类目词表的长度
         doc_id_len = 10
         user_id_len = 10
-        cate_vocab_len = 100
+        cate_vocab_len = 20
 
         self.batch_size = 64
         self.epoch_num = 1
@@ -432,10 +438,3 @@ class RecallAlgorithmContractExample(RecallAlgorithmContract):
         return items
 
 
-def train_init():
-    # train init model
-    contract = RecallAlgorithmContractExample()
-    sample_dir_path = "./data/click_log.json"
-    local_save_path = contract.train(sample_dir_path)
-
-train_init()

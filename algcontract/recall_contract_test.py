@@ -30,6 +30,8 @@ def recall_init_test():
 
 def recall_recall_test():
     recall_contract = recall_init_test()
-    user_feature = {'cate': ['宠物零食', '影视', '游戏', '游戏名词', '游戏名', '角色名', '游戏解说', '游戏比赛', '体育', '运动教学', '电视剧', '纪录片', '奖项', '游戏资讯', '运动品牌', '少儿', '体育资讯', '动漫', '体育明星', '运动项目', '电影', '组织', '民间/大众运动', '综艺']}
+    user_feature = {'cate': {'misc.forsale': 0.18, 'sci.med': 0.08, 'comp.graphics': 0.02, 'talk.politics.guns': 0.18, 'rec.sport.hockey': 0.12, 'soc.religion.christian': 0.08, 'rec.autos': 0.06, 'comp.windows.x': 0.12, 'sci.crypt': 0.08, 'rec.sport.baseball': 0.05, 'comp.sys.mac.hardware': 0.02, 'talk.politics.misc': 0.02, 'comp.os.ms-windows.misc': 0.02}}
     recall_list = recall_contract.recall(user_feature, 20)
     print(recall_list)
+
+recall_recall_test()
